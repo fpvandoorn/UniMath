@@ -15,6 +15,7 @@ Require Import UniMath.Foundations.PartD.
   - Linearity
   - [modulefun]
   - Isomorphisms ([moduleiso])
+  - R-module morphisms form an R-module
 *)
 
 Local Open Scope addmonoid_scope.
@@ -342,13 +343,25 @@ Proof.
   apply grinv_path_from_op_path. now rewrite <- module_mult_is_ldistr, grrinvax, module_mult_1.
 Defined.
 
-(* Definition module_mult_neg1 {R : rng} {M : module R} (x : M) : rngminus1 * x = @grinv _ x. *)
+Lemma module_mult_neg1 {R : rng} {M : module R} (x : M) : rngminus1 * x = @grinv _ x.
+Proof.
+  symmetry. apply grinv_path_from_op_path.
+  refine (maponpaths (λ y, y * _)%multmonoid (!(module_mult_unel2 x)) @ _).
+  now rewrite <- module_mult_is_rdistr, rngrinvax1, module_mult_0_to_0.
+Defined.
 
-(* Definition module_inv_mult_to_inv1 {R : rng} {M : module R} (r : R) (x : M) : *)
-(*   @grinv _ (r * x) = rnginv1 r * x. *)
+Lemma module_inv_mult_to_inv1 {R : rng} {M : module R} (r : R) (x : M) :
+  @grinv _ (r * x) = rnginv1 r * x.
+Proof.
+  apply grinv_path_from_op_path.
+  now rewrite <- module_mult_is_rdistr, rngrinvax1, module_mult_0_to_0.
+Defined.
 
-(* Definition module_mult_inv_to_inv1 {R : rng} {M : module R} (r : R) (x : M) : *)
-(*   r * @grinv _ x = rnginv1 r * x. *)
+Lemma module_mult_inv_to_inv1 {R : rng} {M : module R} (r : R) (x : M) :
+  r * @grinv _ x = rnginv1 r * x.
+Proof.
+  now rewrite <- module_inv_mult_to_inv1, module_inv_mult.
+Defined.
 
 (** To construct a module from a left action satisfying four axioms *)
 
@@ -511,8 +524,10 @@ Proof.
    reflexivity.
 Defined.
 
+Definition moduletomonoid  {R : rng} (M : module R) : abmonoid := abgrtoabmonoid (pr1module M).
+
 Definition modulefun_to_monoidfun {R : rng} {M N : module R} (f : modulefun M N) :
-  monoidfun (abgrtoabmonoid (pr1module M)) (abgrtoabmonoid (pr1module N)) :=
+  monoidfun (moduletomonoid M) (moduletomonoid N) :=
 tpair _ (pr1 f) (tpair _ (pr1 (pr2 f)) (modulefun_unel f)).
 
 Definition modulefun_from_monoidfun {R : rng} {M N : module R} (f : monoidfun M N)
